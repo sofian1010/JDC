@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ajout de lignes au tableau</title>
+  <style>
+    table {
+      border-collapse: collapse;
+    }
+
+    table, th, td {
+      border: 1px solid black;
+      padding: 5px;
+    }
+
+    button {
+      margin-top: 10px;
+    }
+
+    .red {
+      background-color: red;
+    }
+
+    .gray {
+      background-color: gray;
+    }
+
+    .green {
+      background-color: green;
+    }
+
+    .banner {
+      background-color: blue;
+      color: white;
+      padding: 10px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+    }
+
+    #clock {
+      margin-right: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="banner">
+    <span id="clock"></span>
+    Résidence les Jardins de la Cathédrale EVRY
+  </div>
+
+  <div>
+    <label for="login">Login:</label>
+    <input type="text" id="login" name="login">
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password">
+    <button id="loginButton" onclick="authenticate()">Login</button>
+  </div>
+
+  <button id="hideButton" onclick="toggleHideButtons()" disabled>Hide</button>
+
+  <table id="myTable">
+    <tr>
+      <th>Colonne 1</th>
+      <th>Colonne 2</th>
+      <th>Colonne 3</th>
+      <th>Colonne 4</th>
+      <th>Colonne 5</th>
+      <th>Colonne 6</th>
+      <th>Actions</th>
+    </tr>
+    <tr>
+      <td contenteditable="true">Donnée 1</td>
+      <td contenteditable="true">Donnée 2</td>
+      <td contenteditable="true">Donnée 3</td>
+      <td contenteditable="true">Donnée 4</td>
+      <td contenteditable="true">Donnée 5</td>
+      <td contenteditable="true">Donnée 6</td>
+      <td>
+        <button onclick="ajouterCouleur(this.parentNode.parentNode, 'red')">Rouge</button>
+        <button onclick="ajouterCouleur(this.parentNode.parentNode, 'gray')">Gris</button>
+        <button onclick="ajouterCouleur(this.parentNode.parentNode, 'green')">Vert</button>
+        <button onclick="supprimerCouleur(this.parentNode.parentNode)">Réinitialiser</button>
+        <button onclick="supprimerLigne(this.parentNode.parentNode)">Supprimer</button>
+      </td>
+    </tr>
+  </table>
+
+  <button onclick="ajouterLigne()">Ajouter une ligne</button>
+
+  <script>
+    var authenticated = false;
+    var originalButtons = [];
+    var tableCells;
+
+    function authenticate() {
+      var login = document.getElementById("login").value;
+      var password = document.getElementById("password").value;
+
+      // Vérifier si le login et le mot de passe sont corrects
+      if (login === "copro" && password === "hguen") {
+        authenticated = true;
+        document.getElementById("hideButton").disabled = false;
+        showButtons();
+        enableTableCells();
+      } else {
+        authenticated = false;
+        document.getElementById("hideButton").disabled = true;
+        hideButtons();
+        disableTableCells();
+      }
+    }
+
+    function toggleHideButtons() {
+      var buttons = document.getElementsByTagName("button");
+
+      for (var i = 0; i < buttons.length; i++) {
+        if (buttons[i].id !== "hideButton" && buttons[i].id !== "loginButton") {
+          buttons[i].style.display = (buttons[i].style.display === "none") ? "block" : "none";
+          buttons[i].disabled = !buttons[i].disabled;
+        }
+      }
+
+      if (authenticated) {
+        toggleTableCells();
+      }
+    }
+
+    function hideButtons() {
+      var buttons = document.getElementsByTagName("button");
+      for (var i = 0; i < buttons.length; i++) {
+        if (buttons[i].id !== "hideButton" && buttons[i].id !== "loginButton") {
+          buttons[i].style.display = "none"; // Masque les boutons
+          buttons[i].disabled = true; // Désactive les boutons
+        }
+      }
+    }
+
+    function showButtons() {
+      var buttons = document.getElementsByTagName("button");
+      for (var i = 0; i < buttons.length; i++) {
+        buttons[i].style.display = "block"; // Réaffiche les boutons
+        buttons[i].disabled = false; // Active les boutons
+      }
+    }
+
+    function enableTableCells() {
+      tableCells = document.getElementsByTagName("td");
+      for (var i = 0; i < tableCells.length; i++) {
+        tableCells[i].contentEditable = true;
+      }
+    }
+
+    function disableTableCells() {
+      for (var i = 0; i < tableCells.length; i++) {
+        tableCells[i].contentEditable = false;
+      }
+    }
+
+    function toggleTableCells() {
+      for (var i = 0; i < tableCells.length; i++) {
+        tableCells[i].contentEditable = !tableCells[i].contentEditable;
+      }
+    }
+
+    function ajouterLigne() {
+      var table = document.getElementById("myTable");
+
+      var newRow = table.insertRow(-1); // Insérer une nouvelle ligne à la fin du tableau
+
+      for (var i = 0; i < 6; i++) {
+        var cell = newRow.insertCell(i);
+        cell.contentEditable = authenticated; // Permet d'éditer le texte dans la cellule uniquement si l'utilisateur est connecté
+        cell.innerHTML = "Nouvelle donnée " + i;
+      }
+
+      var actionsCell = newRow.insertCell(6);
+      actionsCell.innerHTML = `
+        <button onclick="ajouterCouleur(this.parentNode.parentNode, 'red')">Rouge</button>
+        <button onclick="ajouterCouleur(this.parentNode.parentNode, 'gray')">Gris</button>
+        <button onclick="ajouterCouleur(this.parentNode.parentNode, 'green')">Vert</button>
+        <button onclick="supprimerCouleur(this.parentNode.parentNode)">Réinitialiser</button>
+        <button onclick="supprimerLigne(this.parentNode.parentNode)">Supprimer</button>
+      `;
+    }
+
+    function ajouterCouleur(row, couleur) {
+      row.classList.remove("red", "gray", "green");
+      row.classList.add(couleur);
+    }
+
+    function supprimerCouleur(row) {
+      row.classList.remove("red", "gray", "green");
+    }
+
+    function supprimerLigne(row) {
+      var table = document.getElementById("myTable");
+      var rowIndex = row.rowIndex;
+      table.deleteRow(rowIndex);
+    }
+
+    function updateClock() {
+      var now = new Date();
+      var hours = now.getHours();
+      var minutes = now.getMinutes();
+      var seconds = now.getSeconds();
+      var timeString = hours.toString().padStart(2, "0") + ":" + minutes.toString().padStart(2, "0") + ":" + seconds.toString().padStart(2, "0");
+      document.getElementById("clock").textContent = timeString;
+    }
+
+    setInterval(updateClock, 1000);
+  </script>
+</body>
+</html>
